@@ -29,15 +29,15 @@ jobs:
     strategy:
       matrix:
         os: [linux]
-        php_ver: ['8.0-zts']
-        arch: [x64, x86]
+        php_ver: ['8.1', '8.1-zts']
+        arch: ['arm64']
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
         with:
           ref: ${{ github.event.client_payload.ref }}
       - name: Build Custom Docker Image
-        run: docker build --build-arg ARCH=$ARCH --build-arg PHP_VER=$PHP_VER --build-arg BUILD_TYPE=$BUILD_TYPE -f ./.github/docker/${OS}/${ARCH}/Dockerfile -t $image_name .
+        run: docker buildx build --platform=linux/arm64 --build-arg ARCH=$ARCH --build-arg PHP_VER=$PHP_VER --build-arg BUILD_TYPE=$BUILD_TYPE -f ./.github/docker/${OS}/${ARCH}/Dockerfile -t $image_name .
       - name: Build and Test
         run: docker run --name runtest --workdir /github/workspace --rm -e GITHUB_WORKSPACE -e GITHUB_ENV -v "${GITHUB_WORKSPACE}":"/github/workspace" $image_name
       - name: Save build artifacts
